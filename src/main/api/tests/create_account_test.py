@@ -1,63 +1,25 @@
-import requests
 import pytest
+from src.main.api.models.create_user_request import CreateUserRequest
+from src.main.api.requests.create_user_requester import CreateUserRequester
+from src.main.api.requests.create_account_requester import CreateAccountRequester
+from src.main.api.specs.request_specs import RequestSpecs
+from src.main.api.specs.response_specs import ResponseSpecs
+
 
 @pytest.mark.api
 class TestCreateAccount:
     def test_create_account(self):
-        login_admin_response = requests.post(
-            url="http://localhost:4111/api/auth/token/login",
-            json={
-                "username": "admin",
-                "password": "123456"
-            },
-            headers={
-                "Content-Type": "application/json",
-                "accept": "application/json"
-            }
-        )
+        create_user_request = CreateUserRequest(username="Maxn6n49", password="Pas!sw0rd", role="ROLE_USER")
 
-        assert login_admin_response.status_code == 200
-        assert login_admin_response.json()["user"]["username"] == "admin"
-        assert login_admin_response.json()["user"]["role"] == "ROLE_ADMIN"
+        CreateUserRequester(
+            request_spec=RequestSpecs.auth_headers(username="admin", password="123456"),
+            response_spec=ResponseSpecs.request_ok()
+        ).post(create_user_request)
 
-        token = login_admin_response.json().get("token")
+        response = CreateAccountRequester(
+            request_spec=RequestSpecs.auth_headers(username="Maxn6n49", password="Pas!sw0rd"),
+            response_spec=ResponseSpecs.request_created()
+        ).post()
 
-        create_user_response = requests.post(
-            url="http://localhost:4111/api/admin/create",
-            json={
-                "username": "Max80",
-                "password": "Pas!sw0rd",
-                "role": "ROLE_USER"
-            },
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {token}"
-            }
-        )
+        assert response.balance == 0
 
-        assert create_user_response.status_code == 200
-
-        login_user_response = requests.post(
-            url="http://localhost:4111/api/auth/token/login",
-            json={
-                "username": "Max80",
-                "password": "Pas!sw0rd"
-            },
-            headers={
-                "Content-Type": "application/json",
-                "accept": "application/json"
-            }
-        )
-        assert login_user_response.status_code == 200
-        token = login_user_response.json().get("token")
-
-        create_account_response = requests.post(
-            url="http://localhost:4111/api/account/create",
-            headers={
-                "accept": "application/json",
-                "Authorization": f"Bearer {token}"
-            }
-        )
-
-        assert create_account_response.status_code == 201
-        assert create_account_response.json().get("balance") == 0
