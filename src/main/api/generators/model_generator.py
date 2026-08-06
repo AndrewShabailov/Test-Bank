@@ -1,12 +1,11 @@
 import uuid
-from random import random
-
+import random
 import rstr
 from typing import Any, get_type_hints, get_origin, get_args, Annotated
 from src.main.api.generators.creation_rule import CreationRule
 
 
-class RandomModelGenerotor:
+class RandomModelGenerator:
     @staticmethod
     def generate(cls: type) -> Any:
         type_hints = get_type_hints(cls, include_extras=True)
@@ -14,7 +13,7 @@ class RandomModelGenerotor:
 
         for field_name, annotated_type in type_hints.items():
             rule = None
-            actual_type = annotated_type()
+            actual_type = annotated_type
 
             if get_origin(annotated_type) is Annotated:
                 actual_type, *annotations = get_args(annotated_type)
@@ -23,9 +22,9 @@ class RandomModelGenerotor:
                         rule = ann
 
             if rule:
-                value = RandomModelGenerotor._generate_from_regex(rule.regex, actual_type)
+                value = RandomModelGenerator._generate_from_regex(rule.regex, actual_type)
             else:
-                value = RandomModelGenerotor._generate_value(actual_type)
+                value = RandomModelGenerator._generate_value(actual_type)
 
             init_data[field_name] = value
 
@@ -53,6 +52,6 @@ class RandomModelGenerotor:
         elif field_type is list:
             return [str(uuid.uuid4())[:5]]
         elif isinstance(field_type, type):
-            return RandomModelGenerotor.generate(field_type)
+            return RandomModelGenerator.generate(field_type)
         return None
 
