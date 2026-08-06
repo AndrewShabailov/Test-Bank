@@ -17,26 +17,18 @@ class RequestSpecs:
     def auth_headers(username: str, password: str):
         request = LoginUserRequest(username=username, password=password)
         response = requests.post(
-            url="http://localhost:4111/api/auth/token/login",
+            url=f"{Config.fetch('backendUrl')}/auth/token/login",
             json=request.model_dump(),
             headers=RequestSpecs.base_headers()
         )
-        if response.status_code == 200:
-            response_data = LoginUserResponse(**response.json())
-            token = response_data.token
-            headers = RequestSpecs.base_headers()
-            headers["Authorization"] = f"Bearer {token}"
-            return {
-                "headers": headers,
-                "base_url": Config.fetch("backendUrl")
-            }
-        raise Exception("Failed to login")
+        if response.status_code != 200:
+            raise Exception(f"Failed to login: {response.status_code} {response.text}")
+
+        token = LoginUserResponse(**response.json()).token
+        headers = RequestSpecs.base_headers()
+        headers["Authorization"] = f"Bearer {token}"
+        return headers
 
     @staticmethod
     def unauth_headers():
-        return {
-            "headers": RequestSpecs.base_headers(),
-            "base_url": Config.fetch("backendUrl")
-        }
-
-
+        return RequestSpecs.base_headers()

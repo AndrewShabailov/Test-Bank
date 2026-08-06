@@ -1,5 +1,4 @@
 import requests
-
 from src.main.api.models.login_user_request import LoginUserRequest
 from src.main.api.models.login_user_response import LoginUserResponse
 from src.main.api.requests.requester import Requester
