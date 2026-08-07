@@ -11,7 +11,7 @@ from src.main.api.steps.base_steps import BaseSteps
 class AdminSteps(BaseSteps):
     def create_user(self, create_user_request: CreateUserRequest):
         response = ValidateCrudRequester(
-            RequestSpecs.auth_headers(username="admin", password="123456"),
+            RequestSpecs.auth_headers(username=self.username, password=self.password),
             Endpoint.ADMIN_CREATE_USER,
             ResponseSpecs.request_ok()
         ).post(create_user_request)
@@ -21,14 +21,14 @@ class AdminSteps(BaseSteps):
 
     def delete_user(self, user_id: int):
         CrudRequester(
-            RequestSpecs.auth_headers(username="admin", password="123456"),
+            RequestSpecs.auth_headers(username=self.username, password=self.password),
             Endpoint.ADMIN_DELETE_USER,
             ResponseSpecs.request_ok()
         ).delete(user_id)
 
     def create_invalid_user(self, create_user_request: CreateUserRequest):
         CrudRequester(
-            RequestSpecs.auth_headers(username="admin", password="123456"),
+            RequestSpecs.auth_headers(username=self.username, password=self.password),
             Endpoint.ADMIN_CREATE_USER,
             ResponseSpecs.request_bad()
         ).post(create_user_request)
@@ -40,3 +40,10 @@ class AdminSteps(BaseSteps):
             ResponseSpecs.request_ok()
         ).post(login_user_request)
         return response
+
+    def get_users(self):
+        return ValidateCrudRequester(
+            RequestSpecs.auth_headers(username=self.username, password=self.password),
+            Endpoint.ADMIN_GET_USERS,
+            ResponseSpecs.request_ok()
+        ).get()

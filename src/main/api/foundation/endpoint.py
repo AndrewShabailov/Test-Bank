@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, Type
+from typing import Optional, Type, List, Any
 from src.main.api.models.base_model import BaseModel
 from dataclasses import dataclass
 from src.main.api.models.create_account_response import CreateAccountResponse
@@ -12,7 +12,7 @@ from src.main.api.models.login_user_response import LoginUserResponse
 class EndpointConfiguration:
     url: str
     request_model: Optional[Type[BaseModel]]
-    response_model: Optional[Type[BaseModel]]
+    response_model: Optional[Any]
 
 
 class Endpoint(Enum):
@@ -38,4 +38,10 @@ class Endpoint(Enum):
         request_model = None,
         url = "/account/create",
         response_model = CreateAccountResponse
+    )
+
+    ADMIN_GET_USERS = EndpointConfiguration(
+        request_model=None,
+        url="/admin/users",
+        response_model=List[CreateUserResponse]
     )

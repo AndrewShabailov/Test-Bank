@@ -11,6 +11,7 @@ def created_obj():
     yield objects
     clean_user(objects)
 
+
 def clean_user(objects: List[Any]):
     api_manager = ApiManager(objects)
     for u in objects:

@@ -2,6 +2,7 @@ from src.main.api.foundation.http_requester import HttpRequester
 from src.main.api.foundation.requesters.crud_requester import CrudRequester
 from src.main.api.models.base_model import BaseModel
 from typing import Optional
+from pydantic import TypeAdapter
 
 
 class ValidateCrudRequester(HttpRequester):
@@ -13,12 +14,17 @@ class ValidateCrudRequester(HttpRequester):
             response_spec=response_spec
         )
 
-    def post(self, model: Optional[BaseModel] = None) -> Optional[BaseModel]:
-        response = self.crud_requester.post(model)
-        self.response_spec(response)
-        return self.endpoint.value.response_model.model_validate(response.json())
+    def _validate(self, response):
+        model = self.endpoint.value.response_model
+        if model is None:
+            return response
+        return TypeAdapter(model).validate_python(response.json())
 
-    def delete(self, user_id: int):
-        response = self.crud_requester.delete(user_id)
-        self.response_spec(response)
-        return self.endpoint.value.response_model.model_validate(response.json())
+    def post(self, model: Optional[BaseModel] = None):
+        return self._validate(self.crud_requester.post(model))
+
+    def get(self, entity_id: Optional[int] = None):
+        return self._validate(self.crud_requester.get(entity_id))
+
+    def delete(self, entity_id: Optional[int] = None):
+        return self._validate(self.crud_requester.delete(entity_id))
