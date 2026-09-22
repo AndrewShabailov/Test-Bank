@@ -9,6 +9,7 @@ from src.main.api.steps.base_steps import BaseSteps
 
 
 class AdminSteps(BaseSteps):
+
     def create_user(self, create_user_request: CreateUserRequest):
         response = ValidateCrudRequester(
             RequestSpecs.auth_headers(username=self.username, password=self.password),
